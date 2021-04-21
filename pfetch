@@ -182,14 +182,19 @@ get_title() {
     user=$e$user
     esc SGR "3${PF_COL3:-1}"
     user=$e$user
-    esc SGR 1
+    esc SGR "30"
     user=$user$e
-    esc SGR 1
+    esc SGR "3${PF_COL4:-1}"
     host=$e$host
     esc SGR "3${PF_COL3:-1}"
     host=$e$host
 
     log "${user}@${host}" " " >&6
+}
+
+get_empty() {
+    esc SGR "30"
+    log "${e}-------------" " " >&6
 }
 
 get_os() {
@@ -200,7 +205,7 @@ get_os() {
     # On first run, this function displays _nothing_, only on the second
     # invocation is 'log()' called.
     [ "$distro" ] && {
-        log os "$distro" >&6
+        log  "$distro" >&6 # log os
         return
     }
 
@@ -389,7 +394,7 @@ get_kernel() {
     esac
 
     # '$kernel' is the cached output of 'uname -r'.
-    log kernel "$kernel" >&6
+    log  "$kernel" >&6 # log kernel
 }
 
 get_host() {
@@ -462,7 +467,7 @@ get_host() {
     done
 
     # '$arch' is the cached output from 'uname -m'.
-    log host "${host:-$arch}" >&6
+    log a "${host:-$arch}" >&6 $ log host
 }
 
 get_uptime() {
@@ -536,7 +541,7 @@ get_uptime() {
     case "$h" in ([!0]*) uptime="${uptime}${h}h "; esac
     case "$m" in ([!0]*) uptime="${uptime}${m}m "; esac
 
-    log uptime "${uptime:-0m}" >&6
+    log  "${uptime:-0m}" >&6 # log uptime
 }
 
 get_pkgs() {
@@ -654,11 +659,7 @@ get_pkgs() {
         ;;
     esac
 
-    case $packages in
-        (1?*|[2-9]*)
-            log pkgs "$packages" >&6
-        ;;
-    esac
+    log  "$packages" >&6
 }
 
 get_memory() {
@@ -1012,7 +1013,7 @@ get_de() {
 
 get_shell() {
     # Display the basename of the '$SHELL' environment variable.
-    log shell "${SHELL##*/}" >&6
+    log  "${SHELL##*/}" >&6
 }
 
 get_editor() {
@@ -1396,14 +1397,13 @@ get_ascii() {
             read_ascii 1 <<-EOF
 				${c1}       .:'
 				${c1}    _ :'_
-				${c2} .'\`_\`-'_\`\`.
+				${c3} .'\`_\`-'_\`\`.
 				${c2}:________.-'
-				${c3}:_______:
+				${c6}:_______:
 				${c4} :_______\`-;
 				${c5}  \`._.-._.'
 			EOF
         ;;
-
         ([Mm]ageia*)
             read_ascii 2 <<-EOF
 				${c6}   *
@@ -1561,11 +1561,11 @@ get_ascii() {
 
         ([Rr]aspbian*)
             read_ascii 1 <<-EOF
-				${c2}  __  __
-				${c2} (_\\)(/_)
-				${c1} (_(__)_)
-				${c1}(_(_)(_)_)
-				${c1} (_(__)_)
+				${c5}  __  __
+				${c4} (_\\)(/_)
+				${c6} (_(__)_)
+				${c2}(_(_)(_)_)
+				${c3} (_(__)_)
 				${c1}   (__)
 			EOF
         ;;
@@ -1728,7 +1728,7 @@ main() {
         # Disable globbing and set the positional parameters to the
         # contents of 'PF_INFO'.
         set -f
-        set +f -- ${PF_INFO-ascii title os host kernel uptime pkgs memory}
+        set +f -- ${PF_INFO-ascii title empty os kernel uptime pkgs shell}
 
         # Iterate over the info functions to determine the lengths of the
         # "info names" for output alignment. The option names and subtitles
